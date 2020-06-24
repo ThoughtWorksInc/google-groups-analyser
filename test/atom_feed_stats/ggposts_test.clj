@@ -207,4 +207,18 @@
                (is (vector? (-> rows first :content)))
                (is (= :tr (-> rows second :tag)))
                (is (vector? (-> rows second :content)))))
-    ))
+    (testing "should transform a parsed html doc seq to Topics"
+             (let [all-posts (posts (take 2 topic-posts))]
+               (is (record? (first all-posts)))
+               (is (string? (to-str (first all-posts))))
+               (is (= "jw12203" (:author (first all-posts))))
+               (is (= "6R-GZotaWk8J" (:post-id (first all-posts))))
+               (is (= "aLpvj-J1W2s" (:topic-id (first all-posts))))
+               (is (= "29/01/13 07:09" (:date (first all-posts))))
+               (is (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J" (:email-link (first all-posts))))
+    ))))
+
+(deftest transform-message-url-to-parseable-url
+  (testing "should convert 'https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8' to 'https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J'"
+           (is (= (to-raw-url "https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J") "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"))
+           (is (= (to-raw-url "https://groups.google.com/a/domain.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J") "https://groups.google.com/a/domain.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"))))
