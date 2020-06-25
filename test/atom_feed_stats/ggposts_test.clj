@@ -1,6 +1,7 @@
 (ns atom-feed-stats.ggposts-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :as pp]
+            [java-time :as jt]
             [atom-feed-stats.ggcrawler :as ggc]
             [atom-feed-stats.ggposts :refer :all]))
 
@@ -56,8 +57,7 @@
              (let [topic-posts (ggc/html-hickory-pages urls)]
                (is (seq? topic-posts))
                (is (map? (first topic-posts)))
-               (is (= :document (:type (first topic-posts))))
-               ))))
+               (is (= :document (:type (first topic-posts))))))))
 
 (deftest parse-posts
   (let [topic-post
@@ -65,141 +65,147 @@
          :content
          [{:type :document-type,
            :attrs
-           {:name "html",
+           {:name     "html",
             :publicid "-//W3C//DTD HTML 4.01//EN",
             :systemid "http://www.w3.org/TR/html4/strict.dtd"}}
-          {:type :element,
+          {:type  :element,
            :attrs nil,
-           :tag :html,
+           :tag   :html,
            :content
-           [{:type :element,
+           [{:type  :element,
              :attrs nil,
-             :tag :head,
+             :tag   :head,
              :content
              ["\n\n"
-              {:type :element,
-               :attrs nil,
-               :tag :title,
+              {:type    :element,
+               :attrs   nil,
+               :tag     :title,
                :content ["PM SECTION - Google Groups"]}
               "\n"
-              {:type :element,
+              {:type    :element,
                :attrs
                {:rel "canonical",
                 :href
                 "https://groups.google.com/d/topic/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s"},
-               :tag :link,
+               :tag     :link,
                :content nil}
               "\n"
-              {:type :element,
-               :attrs {:property "og:title", :content "PM SECTION"},
-               :tag :meta,
+              {:type    :element,
+               :attrs   {:property "og:title", :content "PM SECTION"},
+               :tag     :meta,
                :content nil}
               "\n"
-              {:type :element,
-               :attrs {:property "og:type", :content "website"},
-               :tag :meta,
+              {:type    :element,
+               :attrs   {:property "og:type", :content "website"},
+               :tag     :meta,
                :content nil}
               "\n"
-              {:type :element,
+              {:type    :element,
                :attrs
                {:property "og:url",
                 :content
                 "https://groups.google.com/forum/#!topic/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s"},
-               :tag :meta,
+               :tag     :meta,
                :content nil}
               "\n"
-              {:type :element,
+              {:type    :element,
                :attrs
                {:property "og:image",
                 :content
                 "http://www.google.com/images/icons/product/groups-128.png"},
-               :tag :meta,
+               :tag     :meta,
                :content nil}
               "\n"
-              {:type :element,
-               :attrs {:property "og:site_name", :content "Google Groups"},
-               :tag :meta,
+              {:type    :element,
+               :attrs   {:property "og:site_name", :content "Google Groups"},
+               :tag     :meta,
                :content nil}
               "\n"
-              {:type :element,
+              {:type    :element,
                :attrs
                {:property "og:description", :content "Posted 29/01/13 07:09"},
-               :tag :meta,
+               :tag     :meta,
                :content nil}]}
             "\n"
-            {:type :element,
+            {:type  :element,
              :attrs nil,
-             :tag :body,
+             :tag   :body,
              :content
              ["\n\n\n"
               {:type :element, :attrs nil, :tag :h2, :content ["PM SECTION"]}
               "\n"
-              {:type :element,
-               :attrs nil,
-               :tag :i,
+              {:type    :element,
+               :attrs   nil,
+               :tag     :i,
                :content ["Showing 1-1 of 1 messages"]}
               "\n"
-              {:type :element,
+              {:type  :element,
                :attrs {:border "0", :cellspacing "0"},
-               :tag :table,
+               :tag   :table,
                :content
-               [{:type :element,
+               [{:type  :element,
                  :attrs nil,
-                 :tag :tbody,
+                 :tag   :tbody,
                  :content
-                 [{:type :element,
+                 [{:type  :element,
                    :attrs nil,
-                   :tag :tr,
+                   :tag   :tr,
                    :content
-                   [{:type :element,
+                   [{:type  :element,
                      :attrs {:class "subject"},
-                     :tag :td,
+                     :tag   :td,
                      :content
-                     [{:type :element,
+                     [{:type    :element,
                        :attrs
                        {:href
                         "https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J",
                         :title "PM SECTION"},
-                       :tag :a,
+                       :tag     :a,
                        :content ["PM SECTION"]}]}
                     "\n"
-                    {:type :element,
+                    {:type  :element,
                      :attrs {:class "author"},
-                     :tag :td,
+                     :tag   :td,
                      :content
-                     [{:type :element,
-                       :attrs nil,
-                       :tag :span,
+                     [{:type    :element,
+                       :attrs   nil,
+                       :tag     :span,
                        :content ["jw12203"]}]}
                     "\n"
-                    {:type :element,
-                     :attrs {:class "lastPostDate"},
-                     :tag :td,
+                    {:type    :element,
+                     :attrs   {:class "lastPostDate"},
+                     :tag     :td,
                      :content ["29/01/13 07:09"]}
                     "\n"
-                    {:type :element,
+                    {:type  :element,
                      :attrs {:class "snippet"},
-                     :tag :td,
+                     :tag   :td,
                      :content
-                     [{:type :element,
+                     [{:type  :element,
                        :attrs {:style "overflow:auto"},
-                       :tag :div,
+                       :tag   :div,
                        :content
-                       [{:type :element,
+                       [{:type  :element,
                          :attrs {:style "max-height:10000px"},
-                         :tag :div,
+                         :tag   :div,
                          :content
-                         [{:type :element,
-                           :attrs {:dir "ltr"},
-                           :tag :div,
-                           :content ["See PM section"]}]}]}]}]}]}]}
+                         [{:type    :element,
+                           :attrs   {:dir "ltr"},
+                           :tag     :div,
+                           :content ["See PM section"]}]}
+                        {:type  :element,
+                         :attrs {:style "max-height:10000px"},
+                         :tag   :div,
+                         :content
+                         [{:type    :element,
+                           :attrs   {:dir "ltr"},
+                           :tag     :div,
+                           :content ["And then see a different thing."]}]}]}]}]}]}]}
               "\n"]}]}]}
-        topic-posts (repeat topic-post)
-        ]
+        topic-posts (repeat topic-post)]
     (testing "parsing posts"
              (is (map? topic-post))
-             (is (= :document (:type topic-post)))
-             )
+             (is (= :document (:type topic-post))))
     (testing "should transform a parsed html row list to a Topic list"
              (let [rows (ggc/table-rows (take 2 topic-posts))]
                (is (= 2 (count rows)))
@@ -214,11 +220,49 @@
                (is (= "jw12203" (:author (first all-posts))))
                (is (= "6R-GZotaWk8J" (:post-id (first all-posts))))
                (is (= "aLpvj-J1W2s" (:topic-id (first all-posts))))
-               (is (= "29/01/13 07:09" (:date (first all-posts))))
-               (is (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J" (:email-link (first all-posts))))
-    ))))
+               (is (= 2013 (jt/as (:date (first all-posts)) :year)))
+               (is
+                (= ["See PM section" "And then see a different thing."]
+                   (:snippet (first all-posts))))
+               (is
+                (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"
+                   (:email-link (first all-posts))))))))
 
 (deftest transform-message-url-to-parseable-url
   (testing "should convert 'https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8' to 'https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J'"
-           (is (= (to-raw-url "https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J") "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"))
-           (is (= (to-raw-url "https://groups.google.com/a/domain.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J") "https://groups.google.com/a/domain.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"))))
+           (is
+            (=
+             (to-raw-url "https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J")
+             "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"))
+           (is
+            (=
+             (to-raw-url "https://groups.google.com/a/domain.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J")
+             "https://groups.google.com/a/domain.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"))))
+
+(deftest all-the-strings
+  (let [snippet-td {:type  :element,
+                    :attrs {:class "snippet"},
+                    :tag   :td,
+                    :content
+                    [{:type  :element,
+                      :attrs {:style "overflow:auto"},
+                      :tag   :div,
+                      :content
+                      [{:type  :element,
+                        :attrs {:style "max-height:10000px"},
+                        :tag   :div,
+                        :content
+                        [{:type    :element,
+                          :attrs   {:dir "ltr"},
+                          :tag     :div,
+                          :content ["See PM section" "And QT"]}]}
+                       {:type  :element,
+                        :attrs {:style "max-height:10000px"},
+                        :tag   :div,
+                        :content
+                        [{:type    :element,
+                          :attrs   {:dir "ltr"},
+                          :tag     :div,
+                          :content ["A thing."]}]}]}]}]
+    (testing "should return strings"
+             (is (= ["See PM section" "And QT" "A thing."] (all-string-content snippet-td))))))

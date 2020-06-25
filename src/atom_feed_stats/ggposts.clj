@@ -1,13 +1,11 @@
 (ns atom-feed-stats.ggposts
-  (:require [atom-feed-stats.ggcrawler
-             :refer [TopicFn]
-             :as    ggc]
+  (:require [atom-feed-stats.ggcrawler :as ggc]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clj-http.client :as client]
+            [java-time :as jt]
             [hickory.core :as hick]
             [hickory.select :as hicks])
-  (:import atom_feed_stats.ggcrawler.Topic)
   (:gen-class))
 
 (def post-id-re #"^https://groups\.google\.com/(.*)d/msg/(.*)/(.{11})/(.{12})$")
@@ -25,6 +23,13 @@
    #(str (str/replace forum-url-prefix #"_=forum/" "_=topic/") "/" (ggc/to-topic-id %))
    topics))
 
+(defn all-string-content [hickory-map]
+  (->> hickory-map
+       (hicks/select (hicks/tag :div))
+       (map #(:content %))
+       flatten
+       (filter string?)))
+
 (defprotocol PostSummaryFn
   (to-str [_]))
 
@@ -39,9 +44,14 @@
                                                       (hicks/select (hicks/child (hicks/class "author") (hicks/tag :span))) first)
         post-date                                (->> hickory-gg-row
                                                       (hicks/select (hicks/class "lastPostDate")) first)
-        [link enterprise forum topic-id post-id] (re-find post-id-re (ggc/attrs->href a))]
-    (->PostSummary post-id topic-id (ggc/attrs->title a) (-> author :content first) (-> post-date :content first) "snippet" (to-raw-url enterprise forum topic-id post-id))))
+        jt-date                                  (jt/local-date "dd/MM/yy HH:ss" (-> post-date :content first))
+        [link enterprise forum topic-id post-id] (re-find post-id-re (ggc/attrs->href a))
+        snippet                                  (->> hickory-gg-row
+                                                      (hicks/select (hicks/and (hicks/class "snippet") (hicks/tag :td))) first)]
+    (->PostSummary post-id topic-id (ggc/attrs->title a) (-> author :content first) jt-date (all-string-content snippet) (to-raw-url enterprise forum topic-id post-id))))
 
 (def posts
   "takes a sequence of 'hickory parsed google group topic pages' and returns a sequence of PostSummary records"
   (comp #(map gg-row->PostSummary %) ggc/table-rows))
+
+
