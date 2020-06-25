@@ -46,7 +46,7 @@
   [page-url-seq]
   (as-> page-url-seq VAL
         (first VAL)
-        (client/get VAL {:headers (if (empty? @cookies) {} {"cookie" @cookies}) :debug true})
+        (client/get VAL {:headers (if (empty? @cookies) {} {"cookie" @cookies}) :debug false})
         (html->hickory VAL)
         ;        (printlnret VAL)
         (lazy-seq (cons VAL (html-hickory-pages (rest page-url-seq))))))
@@ -64,7 +64,7 @@
   [google-group-hickory-docs]
   (when-let [s (seq google-group-hickory-docs)]
     (lazy-seq
-      (concat (hicks/select (hicks/tag :tr) (first s))
+      (concat (hicks/select (hicks/child (hicks/tag :body) (hicks/tag :table) (hicks/tag :tbody) (hicks/tag :tr)) (first s))
               (table-rows (rest google-group-hickory-docs))))))
 
 (defn gg-row->Topic [hickory-gg-row]

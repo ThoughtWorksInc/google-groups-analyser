@@ -38,17 +38,24 @@
   (to-str [_]
     (str post-id "/" topic-id ", " title ", " author ", " date ", [" snippet "], " email-link)))
 
+(defn to-local-date [date-str]
+  (jt/local-date "dd/MM/yy HH:ss" date-str))
+
 (defn gg-row->PostSummary [hickory-gg-row]
-  (let [a                                        (->> hickory-gg-row (hicks/select (hicks/tag :a)) first)
-        author                                   (->> hickory-gg-row
-                                                      (hicks/select (hicks/child (hicks/class "author") (hicks/tag :span))) first)
-        post-date                                (->> hickory-gg-row
-                                                      (hicks/select (hicks/class "lastPostDate")) first)
-        jt-date                                  (jt/local-date "dd/MM/yy HH:ss" (-> post-date :content first))
-        [link enterprise forum topic-id post-id] (re-find post-id-re (ggc/attrs->href a))
-        snippet                                  (->> hickory-gg-row
-                                                      (hicks/select (hicks/and (hicks/class "snippet") (hicks/tag :td))) first)]
-    (->PostSummary post-id topic-id (ggc/attrs->title a) (-> author :content first) jt-date (all-string-content snippet) (to-raw-url enterprise forum topic-id post-id))))
+  (try
+    (let [a                                        (->> hickory-gg-row (hicks/select (hicks/tag :a)) first)
+          author                                   (->> hickory-gg-row
+                                                        (hicks/select (hicks/child (hicks/class "author") (hicks/tag :span))) first)
+          post-date                                (->> hickory-gg-row
+                                                        (hicks/select (hicks/class "lastPostDate")) first)
+          jt-date                                  (to-local-date (-> post-date :content first))
+          [link enterprise forum topic-id post-id] (re-find post-id-re (ggc/attrs->href a))
+          snippet                                  (->> hickory-gg-row
+                                                        (hicks/select (hicks/and (hicks/class "snippet") (hicks/tag :td))) first)]
+      (->PostSummary post-id topic-id (ggc/attrs->title a) (-> author :content first) jt-date (all-string-content snippet) (to-raw-url enterprise forum topic-id post-id)))
+    (catch Exception e
+      (println "\n" (.getMessage e))
+      )))
 
 (def posts
   "takes a sequence of 'hickory parsed google group topic pages' and returns a sequence of PostSummary records"

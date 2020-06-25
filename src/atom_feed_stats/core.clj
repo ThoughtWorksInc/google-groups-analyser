@@ -1,10 +1,33 @@
 (ns atom-feed-stats.core
   (:require [atom-feed-stats.ggcrawler :as ggc]
+            [atom-feed-stats.ggposts :as pst]
             [java-time :as jt]
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [clojure.xml :as xml])
   (:gen-class))
+
+(defn crawl [[url pages cookie-file]]
+  "The parental figure"
+  (do
+    (if-not (empty? cookie-file)
+      (-> cookie-file slurp ggc/init-cookie-store))
+    (let [page-count         (Integer. pages)
+          docs               (ggc/forum-page-sequence url)
+          topics             (ggc/topics (take page-count docs))
+          topic-count        (* 20 page-count)
+          topic-urls         (pst/topic-post-urls topics url)
+          topic-docs         (ggc/html-hickory-pages topic-urls)
+          all-posts          (pst/posts topic-docs)]
+      (println "-----------------------")
+      (doseq [x (take topic-count topics)] (println (ggc/to-str x)))
+      (println "-----------------------")
+      (println "End of" topic-count "topics.")
+      (println " ")
+      (println "-----------------------")
+      (doseq [y all-posts] (println (pst/to-str y)))
+      (println "-----------------------")
+      (println "End of" topic-count "posts."))))
 
 (defn -main [& args]
   (if (< (count args) 2)
@@ -19,4 +42,4 @@
                " "]]
       (println s))
 
-    (ggc/crawl args)))
+    (crawl args)))

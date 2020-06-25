@@ -226,7 +226,21 @@
                    (:snippet (first all-posts))))
                (is
                 (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"
-                   (:email-link (first all-posts))))))))
+                   (:email-link (first all-posts))))
+               (is (record? (second all-posts)))
+               (is (string? (to-str (second all-posts))))
+               (is (= "jw12203" (:author (second all-posts))))
+               (is (= "6R-GZotaWk8J" (:post-id (second all-posts))))
+               (is (= "aLpvj-J1W2s" (:topic-id (second all-posts))))
+               (is (= 2013 (jt/as (:date (second all-posts)) :year)))
+               (is
+                (= ["See PM section" "And then see a different thing."]
+                   (:snippet (second all-posts))))
+               (is
+                (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"
+                   (:email-link (second all-posts))))
+;               (is (not (nil? (doseq [x all-posts] (println x)))))
+               ))))
 
 (deftest transform-message-url-to-parseable-url
   (testing "should convert 'https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8' to 'https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J'"
