@@ -1,0 +1,19 @@
+<feed>
+    <id>https://groups.google.com/a/domain.example/d/forum/foo-forum</id>
+    <title type="text">Foo Forum</title>
+    <subtitle></subtitle>
+    <link rel="self" href="https://groups.google.com/a/domain.example/forum/feed/foo-forum/msgs/atom_v1_0.xml" title="foo-forum feed"></link>
+    <updated></updated>
+    <generator>Google Groups</generator>
+    <entry>
+        <author>
+            <name>Jeantine Mankelow</name>
+            <email>jmankelo@domain.example</email>
+        </author>
+        <updated>2020-06-16T13:52:02Z</updated>
+        <id>https://groups.google.com/a/domain.example/d/topic/foo-forum/JMbrEv9rJgg</id>
+        <link href="https://groups.google.com/a/domain.example/d/topic/foo-forum/JMbrEv9rJgg"></link>
+        <title type="text">Foo Bar</title>
+        <summary type="html">The initial commitment...</summary>
+    </entry>
+</feed>
