@@ -32,8 +32,6 @@
   [author, title, link]
   (->Topic title author link))
 
-(defn printlnret [x] (println x) x)
-
 (defn forum-page-urls
   "returns a lazy sequence of google group urls using default of 20 topics per page"
   ([url] (forum-page-urls url 1))
@@ -85,17 +83,3 @@
 (def forum-page-sequence
   "given an href for a google group, it'll return an infinite sequence of forum pages"
   (comp html-hickory-pages forum-page-urls))
-
-(defn crawl [[url pages cookie-file]]
-  "The parental figure"
-  (do
-    (if-not (empty? cookie-file)
-     (-> cookie-file slurp init-cookie-store))
-    (let [page-count         (Integer. pages)
-          docs               (forum-page-sequence url)
-          topics             (topics (take page-count docs))
-          topic-count        (* 20 page-count)]
-      (println "-----------------------")
-      (doseq [x (take topic-count topics)] (println (to-str x)))
-      (println "-----------------------")
-      (println "End of " topic-count " topics."))))
