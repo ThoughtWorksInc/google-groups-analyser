@@ -257,8 +257,7 @@
   (let [snippet-td {:type  :element,
                     :attrs {:class "snippet"},
                     :tag   :td,
-                    :content
-                    [{:type  :element,
+                    :content [{:type  :element,
                       :attrs {:style "overflow:auto"},
                       :tag   :div,
                       :content
@@ -279,7 +278,7 @@
                           :tag     :div,
                           :content ["A thing."]}]}]}]}]
     (testing "should return strings"
-             (is (= ["See PM section And QT A thing."] (all-string-content snippet-td))))))
+             (is (= "See PM section And QT A thing." (all-string-content snippet-td))))))
 
 (deftest summarise-topics
   (let
@@ -331,5 +330,6 @@
                (is (map? topic-summaries))
                (is (< (count topic-summaries) (count post-summaries)))
                (is (= 18 (count topic-summaries)))
-;               (is (= ((get topic-summaries "bx12CglPiG0") :post-id) "AEAMsIVCqbAJ"))
+               (is (= (get (first (get topic-summaries "bx12CglPiG0")) :post-id)
+                      "AEAMsIVCqbAJ"))
                ))))
