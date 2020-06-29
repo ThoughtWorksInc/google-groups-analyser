@@ -28,7 +28,9 @@
        (hicks/select (hicks/tag :div))
        (map #(:content %))
        flatten
-       (filter string?)))
+       (filter string?)
+       (interpose " ")
+       (apply str)))
 
 (defprotocol PostSummaryFn
   (to-str [_]))
@@ -54,11 +56,14 @@
                                                         (hicks/select (hicks/and (hicks/class "snippet") (hicks/tag :td))) first)]
       (->PostSummary post-id topic-id (ggc/attrs->title a) (-> author :content first) jt-date (all-string-content snippet) (to-raw-url enterprise forum topic-id post-id)))
     (catch Exception e
-      (println "\n" (.getMessage e))
-      )))
+      (println "\n" (.getMessage e)))))
 
 (def posts
   "takes a sequence of 'hickory parsed google group topic pages' and returns a sequence of PostSummary records"
   (comp #(map gg-row->PostSummary %) ggc/table-rows))
+
+(defn summarise [posts]
+  "groups PostSummary records by their topic-id"
+  (group-by :topic-id posts))
 
 

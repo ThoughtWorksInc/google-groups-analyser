@@ -222,7 +222,7 @@
                (is (= "aLpvj-J1W2s" (:topic-id (first all-posts))))
                (is (= 2013 (jt/as (:date (first all-posts)) :year)))
                (is
-                (= ["See PM section" "And then see a different thing."]
+                (= "See PM section And then see a different thing."
                    (:snippet (first all-posts))))
                (is
                 (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"
@@ -234,13 +234,13 @@
                (is (= "aLpvj-J1W2s" (:topic-id (second all-posts))))
                (is (= 2013 (jt/as (:date (second all-posts)) :year)))
                (is
-                (= ["See PM section" "And then see a different thing."]
+                (= "See PM section And then see a different thing."
                    (:snippet (second all-posts))))
                (is
                 (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"
-                   (:email-link (second all-posts))))
-;               (is (not (nil? (doseq [x all-posts] (println x)))))
-               ))))
+                   (:email-link (second all-posts))))))))
+
+;               (is (not (nil? (doseq [x all-posts] (println x)))))))))
 
 (deftest transform-message-url-to-parseable-url
   (testing "should convert 'https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8' to 'https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J'"
@@ -279,4 +279,57 @@
                           :tag     :div,
                           :content ["A thing."]}]}]}]}]
     (testing "should return strings"
-             (is (= ["See PM section" "And QT" "A thing."] (all-string-content snippet-td))))))
+             (is (= ["See PM section And QT A thing."] (all-string-content snippet-td))))))
+
+(deftest summarise-topics
+  (let
+    [post-summaries
+     [(->PostSummary "6R-GZotaWk8J", "aLpvj-J1W2s", "PM SECTION", "jw12203", "2013-01-29", "[clojure.lang.LazySeq@5b645dee]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J")
+      (->PostSummary "gvltIJFyPE0J", "e9uMeq-0Xyg", "TO DO LIST TUESDAY 22ND JANUARY....", "jw12203", "2013-01-21", "[clojure.lang.LazySeq@e8347808]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/e9uMeq-0Xyg/gvltIJFyPE0J")
+      (->PostSummary "XgPycajFyYoJ", "e9uMeq-0Xyg", "Re: TO DO LIST TUESDAY 22ND JANUARY....", "jw12203", "2013-01-21", "[clojure.lang.LazySeq@199116dc]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/e9uMeq-0Xyg/XgPycajFyYoJ")
+      (->PostSummary "DlZokN0NkOoJ", "12bVEm_Bbzk", "Latest (Totally Awesome!) Version", "Matt", "2013-01-21", "[clojure.lang.LazySeq@a84ecc74]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/12bVEm_Bbzk/DlZokN0NkOoJ")
+      (->PostSummary "IFzbHayRSzQJ", "12bVEm_Bbzk", "Re: Latest (Totally Awesome!) Version", "jw12203", "2013-01-21", "[clojure.lang.LazySeq@3629a09e]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/12bVEm_Bbzk/IFzbHayRSzQJ")
+      (->PostSummary "_eX2PEf2snIJ", "9qrFrhGnwrE", "Latest (Currently not really working) version", "Matt", "2013-01-21", "[clojure.lang.LazySeq@c947d040]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/9qrFrhGnwrE/_eX2PEf2snIJ")
+      (->PostSummary "azH6zlcSf0cJ", "9qrFrhGnwrE", "Re: Latest (Currently not really working) version", "jw12203", "2013-01-21", "[clojure.lang.LazySeq@934db914]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/9qrFrhGnwrE/azH6zlcSf0cJ")
+      (->PostSummary "c--JdvqUQh8J", "1y4HYKuwmOI", "Level Selection", "Matt", "2013-01-21", "[clojure.lang.LazySeq@1]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/1y4HYKuwmOI/c--JdvqUQh8J")
+      (->PostSummary "rDulxr2OnXIJ", "1y4HYKuwmOI", "Re: Level Selection", "Matt", "2013-01-21", "[clojure.lang.LazySeq@4c9fcb44]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/1y4HYKuwmOI/rDulxr2OnXIJ")
+      (->PostSummary "mRLOyyxYL40J", "1y4HYKuwmOI", "Re: Level Selection", "yc12143", "2013-01-21", "[clojure.lang.LazySeq@1]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/1y4HYKuwmOI/mRLOyyxYL40J")
+      (->PostSummary "gDkGQaE_0ckJ", "r8hTOyF7F20", "boss", "jw12203", "2013-01-21", "[clojure.lang.LazySeq@1]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/r8hTOyF7F20/gDkGQaE_0ckJ")
+      (->PostSummary "5h6iTBPx7_4J", "76qh8Jz_qG4", "User Manual", "mm1...@my.bristol.ac.uk", "2013-01-20", "[clojure.lang.LazySeq@d6d45588]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/76qh8Jz_qG4/5h6iTBPx7_4J")
+      (->PostSummary "c4u0eyWtSN4J", "roG_h87mfk0", "Level 5", "Matt", "2013-01-20", "[clojure.lang.LazySeq@e8957618]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/roG_h87mfk0/c4u0eyWtSN4J")
+      (->PostSummary "YlsOFj29BFAJ", "X4IgmxGo5j4", "Level4", "yc12143", "2013-01-18", "[clojure.lang.LazySeq@1]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/X4IgmxGo5j4/YlsOFj29BFAJ")
+      (->PostSummary "MUUH7O_xFt0J", "X4IgmxGo5j4", "Re: Level4", "yc12143", "2013-01-18", "[clojure.lang.LazySeq@2909ef6e]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/X4IgmxGo5j4/MUUH7O_xFt0J")
+      (->PostSummary "04U97qdv10QJ", "X4IgmxGo5j4", "Re: Level4", "jw12203", "2013-01-19", "[clojure.lang.LazySeq@5987d1d5]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/X4IgmxGo5j4/04U97qdv10QJ")
+      (->PostSummary "71r-0arYfqEJ", "X4IgmxGo5j4", "Re: Level4", "yc12143", "2013-01-20", "[clojure.lang.LazySeq@ea045a81]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/X4IgmxGo5j4/71r-0arYfqEJ")
+      (->PostSummary "a-s7QloCNBQJ", "X4IgmxGo5j4", "Re: Level4", "jw12203", "2013-01-20", "[clojure.lang.LazySeq@c00935e6]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/X4IgmxGo5j4/a-s7QloCNBQJ")
+      (->PostSummary "vrB-bXFuRe0J", "X4IgmxGo5j4", "Re: Level4", "jw12203", "2013-01-20", "[clojure.lang.LazySeq@aa6f3f76]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/X4IgmxGo5j4/vrB-bXFuRe0J")
+      (->PostSummary "xVU2IVy7LQEJ", "X4IgmxGo5j4", "Re: Level4", "jw12203", "2013-01-20", "[clojure.lang.LazySeq@e6f69ba4]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/X4IgmxGo5j4/xVU2IVy7LQEJ")
+      (->PostSummary "wxM0NbOQgtMJ", "X4IgmxGo5j4", "Re: Level4", "jw12203", "2013-01-20", "[clojure.lang.LazySeq@424e1030]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/X4IgmxGo5j4/wxM0NbOQgtMJ")
+      (->PostSummary "Q5hOXH4554UJ", "4RpCgJDx7uA", "Updated code with working enemy sprites", "Matt", "2013-01-19", "[clojure.lang.LazySeq@b83ee883]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/4RpCgJDx7uA/Q5hOXH4554UJ")
+      (->PostSummary "n7TpuBaF9sgJ", "S3FYEqDrenc", "Project Management Section....", "jw12203", "2013-01-19", "[clojure.lang.LazySeq@292a5fa1]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/S3FYEqDrenc/n7TpuBaF9sgJ")
+      (->PostSummary "xWlSAds9roIJ", "S3FYEqDrenc", "Re: Project Management Section....", "jw12203", "2013-01-19", "[clojure.lang.LazySeq@4e7c7f50]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/S3FYEqDrenc/xWlSAds9roIJ")
+      (->PostSummary "enDANcw6kUsJ", "S3FYEqDrenc", "Re: Project Management Section....", "jw12203", "2013-01-19", "[clojure.lang.LazySeq@9b696b82]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/S3FYEqDrenc/enDANcw6kUsJ")
+      (->PostSummary "JAiziAWSpNUJ", "d87dTK2TwGI", "IF FUNCTION - Final Version", "mm1...@my.bristol.ac.uk", "2013-01-18", "[clojure.lang.LazySeq@e4f90959]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/d87dTK2TwGI/JAiziAWSpNUJ")
+      (->PostSummary "6gMoYeoY18cJ", "-463YuVaC3k", "IF Function", "mm1...@my.bristol.ac.uk", "2013-01-17", "[clojure.lang.LazySeq@95b7b169]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/-463YuVaC3k/6gMoYeoY18cJ")
+      (->PostSummary "IrbjfhfAjY4J", "-463YuVaC3k", "Re: IF Function", "mm1...@my.bristol.ac.uk", "2013-01-17", "[clojure.lang.LazySeq@1ccae150]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/-463YuVaC3k/IrbjfhfAjY4J")
+      (->PostSummary "SOFpPc_lFFQJ", "-463YuVaC3k", "Re: IF Function", "mm1...@my.bristol.ac.uk", "2013-01-17", "[clojure.lang.LazySeq@eb910f85]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/-463YuVaC3k/SOFpPc_lFFQJ")
+      (->PostSummary "p0fTnau0VHQJ", "-463YuVaC3k", "Re: IF Function", "mm1...@my.bristol.ac.uk", "2013-01-17", "[clojure.lang.LazySeq@b27d01f4]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/-463YuVaC3k/p0fTnau0VHQJ")
+      (->PostSummary "6caBy9JeYs4J", "-463YuVaC3k", "Re: IF Function", "mm1...@my.bristol.ac.uk", "2013-01-18", "[clojure.lang.LazySeq@6135fdd6]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/-463YuVaC3k/6caBy9JeYs4J")
+      (->PostSummary "aHs6S8anWRsJ", "-463YuVaC3k", "Re: IF Function", "mm1...@my.bristol.ac.uk", "2013-01-18", "[clojure.lang.LazySeq@1]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/-463YuVaC3k/aHs6S8anWRsJ")
+      (->PostSummary "AEAMsIVCqbAJ", "bx12CglPiG0", "Updated Integrated Sophisticated Game", "Matt", "2013-01-16", "[clojure.lang.LazySeq@c12b7843]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/bx12CglPiG0/AEAMsIVCqbAJ")
+      (->PostSummary "U9YsuzPKSIkJ", "GIxU1KAC1ok", "Combined", "Matt", "2013-01-15", "[clojure.lang.LazySeq@7078b6f0]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/GIxU1KAC1ok/U9YsuzPKSIkJ")
+      (->PostSummary "7MzE8lqBtH8J", "GIxU1KAC1ok", "Re: Combined", "jw12203", "2013-01-15", "[clojure.lang.LazySeq@c8c5aa05]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/GIxU1KAC1ok/7MzE8lqBtH8J")
+      (->PostSummary "UUt7v378T2kJ", "GIxU1KAC1ok", "Re: Combined", "Matt", "2013-01-15", "[clojure.lang.LazySeq@3e802e79]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/GIxU1KAC1ok/UUt7v378T2kJ")
+      (->PostSummary "Nv1Ssf4w1DkJ", "gFds_Ztxidc", "Loops", "Matt", "2013-01-14", "[clojure.lang.LazySeq@5b7cef1d]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/gFds_Ztxidc/Nv1Ssf4w1DkJ")
+      (->PostSummary "MULID9rbOAwJ", "gFds_Ztxidc", "Re: Loops", "jw12203", "2013-01-14", "[clojure.lang.LazySeq@c37b68cf]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/gFds_Ztxidc/MULID9rbOAwJ")
+      (->PostSummary "WelQ5RlP8_EJ", "rlZv8ACrdIk", "2nd level with collsion and death etc etc", "jw12203", "2013-01-14", "[clojure.lang.LazySeq@6595a7d7]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/rlZv8ACrdIk/WelQ5RlP8_EJ")
+      (->PostSummary "2f7w--CY1XEJ", "rlZv8ACrdIk", "Re: 2nd level with collsion and death etc etc", "jw12203", "2013-01-14", "[clojure.lang.LazySeq@be220040]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/rlZv8ACrdIk/2f7w--CY1XEJ")
+      (->PostSummary "ZPVTc9e_dP0J", "07TKj7s5Eto", "Tightened Code", "Matt", "2013-01-14", "[clojure.lang.LazySeq@b76358de]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/07TKj7s5Eto/ZPVTc9e_dP0J")
+      (->PostSummary "HbqA7ietFlUJ", "07TKj7s5Eto", "Re: Tightened Code", "Matt", "2013-01-14", "[clojure.lang.LazySeq@4af48185]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/07TKj7s5Eto/HbqA7ietFlUJ")]]
+    (testing "should group PostSummarys by topic ID and give summary information "
+             (let [topic-summaries (summarise post-summaries)]
+               (is (map? topic-summaries))
+               (is (< (count topic-summaries) (count post-summaries)))
+               (is (= 18 (count topic-summaries)))
+;               (is (= ((get topic-summaries "bx12CglPiG0") :post-id) "AEAMsIVCqbAJ"))
+               ))))
