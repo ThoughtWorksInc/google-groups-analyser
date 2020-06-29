@@ -66,17 +66,25 @@
 
 (deftest thread-stat-processing
   (testing "transform grouped Entry records into ThreadStat records"
-           ; (defrecord Entry [thread-id name email updated title summary])
-           (let [entry1             (->Entry "foo" "Chris" "chris@email" (jt/instant "2020-06-16T13:52:02Z") "[DEAL REVIEW] This Deal" "Hi All, Here's a project.")
-                 entry2             (->Entry "bar" "Tara" "tara@email.com" (jt/instant "2020-05-12T15:35:41Z") "[DEAL REVIEW] That Deal" "Hi All, It's a big deal.")
-                 entry3             (->Entry "bar" "Rand" "rand@email.com" (jt/instant "2020-05-14T16:31:51Z") "[DEAL REVIEW] That Deal" "Not such a big deal.")
-                 entry4             (->Entry "bar" "Rand" "rand@email.com" (jt/instant "2020-05-15T11:39:11Z") "[DEAL REVIEW] That Deal" "Woohoo! Winner.")
-                 threads            (group-entries-by-thread-id (list entry1 entry2 entry3))]
-             ; (pp/pprint (-> threads (map-to-ThreadStat) last get-values))
-             (is (= 0 (-> {} map-to-ThreadStat count)))
-             (is (= 2 (-> threads map-to-ThreadStat count)))
-             (is (= 2 (-> threads map-to-ThreadStat last :unique-contributor-count))
-             )))
+    ; (defrecord Entry [thread-id name email updated title summary])
+    (let [entry1      (->Entry "foo" "Chris" "chris@email" (jt/instant "2020-06-16T13:52:02Z") "[DEAL REVIEW] This Deal" "Hi All, Here's a project.")
+          entry2      (->Entry "bar" "Tara" "tara@email.com" (jt/instant "2020-05-12T15:35:41Z") "[DEAL REVIEW] That Deal" "Hi All, It's a big deal.")
+          entry3      (->Entry "bar" "Rand" "rand@email.com" (jt/instant "2020-05-15T16:31:51Z") "[DEAL REVIEW] That Deal" "Not such a big deal.")
+          entry4      (->Entry "bar" "Rand" "rand@email.com" (jt/instant "2020-05-16T11:39:11Z") "[DEAL REVIEW] That Deal" "Woohoo! Winner.")
+          threads     (group-entries-by-thread-id (list entry1 entry2 entry3 entry4))
+          threadstats (map-to-ThreadStat threads)]
+      ; (pp/pprint (-> threads (map-to-ThreadStat) last get-values))
+      (is (= 0 (-> {} map-to-ThreadStat count)))
+      (is (= 2 (count threadstats)))
+      (is (= "bar" (-> threadstats last :thread-id)))
+      (is (= "[DEAL REVIEW] That Deal" (-> threadstats last :title)))
+      (is (= "Tara" (-> threadstats last :initiator)))
+      (is (= 3 (-> threadstats last :email-count)))
+      (is (= 3 (-> threadstats last :days-span)))
+      (is (= 2 (-> threadstats last :unique-contributor-count)))
+      (is (= ["tara@email.com" "rand@email.com"] (-> threadstats last :unique-contributors)))
+      ))
+
   (testing "protocols on records"
            (let [stat (->ThreadStat "id" "deal" "chris" "1" "28" "1" ["chris@email"])]
              ; (pp/pprint (get-values stat))
