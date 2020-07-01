@@ -1003,3 +1003,7 @@
              (is (record? (first sixty-topics)))
              (is (string? (to-str (first sixty-topics)))))))
 
+(deftest hickory-pages
+  (testing "should fetch a hickory page from a url and turn it into a sequence of hickory maps"
+    (is (contains? (first (html-hickory-pages ["https://groups.google.com/forum/#!forum/django-users"]))
+                   :content))))

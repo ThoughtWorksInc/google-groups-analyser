@@ -39,15 +39,15 @@
    (lazy-seq
      (cons (str url "%5B" page "-" (+ page 19) "%5D") (forum-page-urls url (+ page 20))))))
 
+(defn- url->hickory [url]
+  (-> url
+      (client/get {:headers (if (empty? @cookies) {} {"cookie" @cookies}) :debug false})
+      html->hickory))
+
 (defn html-hickory-pages
   "returns a lazy seq of hickory maps representing the parsed html body"
   [page-url-seq]
-  (as-> page-url-seq VAL
-        (first VAL)
-        (client/get VAL {:headers (if (empty? @cookies) {} {"cookie" @cookies}) :debug false})
-        (html->hickory VAL)
-        ;        (printlnret VAL)
-        (lazy-seq (cons VAL (html-hickory-pages (rest page-url-seq))))))
+  (map #(url->hickory %) page-url-seq))
 
 (defn get-more-topics-link
   "returns the href for the next forum page.  Not used, prefer to generate a lazy sequence of all possible pages."
@@ -66,7 +66,7 @@
               (table-rows (rest google-group-hickory-docs))))))
 
 (defn gg-row->Topic [hickory-gg-row]
-  (let [a      (->> hickory-gg-row (hicks/select (hicks/tag :a)) first)
+  (let [a (->> hickory-gg-row (hicks/select (hicks/tag :a)) first)
         author (->> hickory-gg-row
                     (hicks/select (hicks/child (hicks/class "author") (hicks/tag :span))) first)]
     (->Topic (attrs->title a) (-> author :content first) (attrs->href a))))
