@@ -1004,6 +1004,9 @@
              (is (string? (to-str (first sixty-topics)))))))
 
 (deftest hickory-pages
-  (testing "should fetch a hickory page from a url and turn it into a sequence of hickory maps"
-    (is (contains? (first (html-hickory-pages ["https://groups.google.com/forum/#!forum/django-users"]))
-                   :content))))
+  (testing "should fetch a hickory page from a url and turn it into a hickory map"
+    (is (contains? (url->hickory "https://groups.google.com/forum/#!forum/django-users")
+                   :content)))
+  (testing "should turn a collection of urls into a collection of hickory pages"
+    (is (html-hickory-pages ["https://groups.google.com/forum/?_escaped_fragment_=forum/ubu-comp-sci-masters-project-group-4"
+                             "https://groups.google.com/forum/#!forum/django-users"]))))

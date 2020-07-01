@@ -39,7 +39,7 @@
    (lazy-seq
      (cons (str url "%5B" page "-" (+ page 19) "%5D") (forum-page-urls url (+ page 20))))))
 
-(defn- url->hickory [url]
+(defn url->hickory [url]
   (-> url
       (client/get {:headers (if (empty? @cookies) {} {"cookie" @cookies}) :debug false})
       html->hickory))
