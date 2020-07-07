@@ -13,5 +13,6 @@ pom.xml.asc
 /.idea
 /resources/deal-review-atom-feed.xml
 *.iml
+/temp
 
 cookies
