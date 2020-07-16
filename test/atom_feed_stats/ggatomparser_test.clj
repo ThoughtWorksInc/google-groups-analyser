@@ -77,3 +77,9 @@
   (testing "protocols on records"
     (let [stat (->ThreadStat "id" "deal" "chris" "1" "28" "1" ["chris@email"])]
       (is (= 7 (-> stat get-values count))))))
+
+(deftest thread-stat-csv
+  (testing "should transform a threadstat into csv format"
+    (let [stat (->ThreadStat "id" "deal" "chris" "1" "28" "1" ["chris@email"])
+          threadstat-csv (to-str stat)]
+      (= ("id, deal, chris, 1, 28, 1, chris@email" threadstat-csv)))))

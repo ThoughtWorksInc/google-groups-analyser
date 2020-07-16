@@ -35,20 +35,21 @@
 
 (defn entry-reducer [entry-seq entry-field func]
   (->> entry-seq
-       (map #(-> % entry-field))
+       (map #(-> % entry-field jt/local-date))
+
        (apply func)))
 
 (defn oldest-entry-instant [entry-seq]
-  (entry-reducer entry-seq :updated jt/min))
+  (entry-reducer entry-seq :date jt/min))
 
 (defn newest-entry-instant [entry-seq]
-  (entry-reducer entry-seq :updated jt/max))
+  (entry-reducer entry-seq :date jt/max))
 
 (defn group-entries-by-thread-id [entries]
   (group-by :thread-id entries))
 
 (defn group-entries-by-email [entries]
-  (group-by :email entries))
+  (group-by :author entries))
 
 (defprotocol Values (get-values [_]))
 
@@ -77,9 +78,12 @@
           unique-emails (group-entries-by-email v)]
      (->ThreadStat k
                    (:title f)
-                   (:name f)
+                   (:author f)
                    (count v)
                    (jt/time-between (oldest-entry-instant v) (newest-entry-instant v) :days)
                    (count unique-emails)
                    (keys unique-emails)))
    threads))
+
+(defn to-str [threadstat]
+  (apply str (interpose ", " (vals threadstat))))

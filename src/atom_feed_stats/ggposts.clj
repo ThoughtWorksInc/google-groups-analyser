@@ -1,5 +1,6 @@
 (ns atom-feed-stats.ggposts
   (:require [atom-feed-stats.ggcrawler :as ggc]
+            [atom-feed-stats.ggatomparser :as gga]
             [clojure.java.io :as io]
             [clojure.string :as str]
             [clj-http.client :as client]
@@ -56,7 +57,7 @@
                                                         (hicks/select (hicks/and (hicks/class "snippet") (hicks/tag :td))) first)]
       (->PostSummary post-id
                      topic-id
-                     (ggc/attrs->title a)
+                     (-> a ggc/attrs->title (str/replace "," ""))
                      (-> author :content first)
                      jt-date
                      (-> snippet all-string-content (str/replace "," "") (str/replace "/n" ""))
@@ -71,7 +72,10 @@
 
 (defn summarise [posts]
   "groups PostSummary records by their topic-id"
-  (group-by :topic-id posts))
+  (->> posts
+       (group-by :topic-id)
+       gga/map-to-ThreadStat
+       ))
 
 
 
