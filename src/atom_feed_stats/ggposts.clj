@@ -38,10 +38,10 @@
 (defrecord PostSummary [post-id topic-id title author date snippet email-link]
   PostSummaryFn
   (to-str [_]
-    (str post-id "/" topic-id ", " title ", " author ", " date ", [" snippet "], " email-link)))
+    (str post-id "/" topic-id ", " title ", " author ", " date ", [" "], " email-link)))
 
 (defn to-local-date [date-str]
-  (jt/local-date "dd/MM/yy HH:ss" date-str))
+  (jt/local-date "M/d/yy H:ss a" date-str))
 
 (defn gg-row->PostSummary [hickory-gg-row]
   (try
@@ -54,16 +54,24 @@
           [link enterprise forum topic-id post-id] (re-find post-id-re (ggc/attrs->href a))
           snippet                                  (->> hickory-gg-row
                                                         (hicks/select (hicks/and (hicks/class "snippet") (hicks/tag :td))) first)]
-      (->PostSummary post-id topic-id (ggc/attrs->title a) (-> author :content first) jt-date (all-string-content snippet) (to-raw-url enterprise forum topic-id post-id)))
+      (->PostSummary post-id
+                     topic-id
+                     (ggc/attrs->title a)
+                     (-> author :content first)
+                     jt-date
+                     (-> snippet all-string-content (str/replace "," "") (str/replace "/n" ""))
+                     (to-raw-url enterprise forum topic-id post-id)))
     (catch Exception e
       (println "\n" (.getMessage e)))))
 
 (def posts
   "takes a sequence of 'hickory parsed google group topic pages' and returns a sequence of PostSummary records"
-  (comp #(map gg-row->PostSummary %) ggc/table-rows))
+  (comp #(map gg-row->PostSummary %)
+        ggc/table-rows))
 
 (defn summarise [posts]
   "groups PostSummary records by their topic-id"
   (group-by :topic-id posts))
+
 
 

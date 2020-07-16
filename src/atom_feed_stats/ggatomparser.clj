@@ -1,6 +1,5 @@
 (ns atom-feed-stats.ggatomparser
   (:require [java-time :as jt]
-            [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [clojure.xml :as xml])
   (:gen-class))

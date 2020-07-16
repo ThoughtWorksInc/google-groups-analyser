@@ -1,6 +1,5 @@
 (ns atom-feed-stats.ggposts-test
   (:require [clojure.test :refer :all]
-            [clojure.pprint :as pp]
             [java-time :as jt]
             [atom-feed-stats.ggcrawler :as ggc]
             [atom-feed-stats.ggposts :refer :all]))
@@ -49,236 +48,153 @@
          (ggc/new-topic "jw12203", "Draft of the Stakeholder Analysis", "https://groups.google.com/d/topic/ubu-comp-sci-masters-project-group-4/IRbn54xvN7o")]
         urls (topic-post-urls topics "https://groups.google.com/forum/?_escaped_fragment_=forum/ubu-comp-sci-masters-project-group-4")]
     (testing "get URLs for posts"
-             (is (= 40 (count urls)))
-             (is
-              (= "https://groups.google.com/forum/?_escaped_fragment_=topic/ubu-comp-sci-masters-project-group-4/IRbn54xvN7o"
-                 (last urls))))
+      (is (= 40 (count urls)))
+      (is
+        (= "https://groups.google.com/forum/?_escaped_fragment_=topic/ubu-comp-sci-masters-project-group-4/IRbn54xvN7o"
+           (last urls))))
     (testing "fetching posts"
-             (let [topic-posts (ggc/html-hickory-pages urls)]
-               (is (seq? topic-posts))
-               (is (map? (first topic-posts)))
-               (is (= :document (:type (first topic-posts))))))))
+      (let [topic-posts (ggc/html-hickory-pages urls)]
+        (is (seq? topic-posts))
+        (is (map? (first topic-posts)))
+        (is (= :document (:type (first topic-posts))))))))
 
 (deftest parse-posts
-  (let [topic-post
-        {:type :document,
-         :content
-         [{:type :document-type,
-           :attrs
-           {:name     "html",
-            :publicid "-//W3C//DTD HTML 4.01//EN",
-            :systemid "http://www.w3.org/TR/html4/strict.dtd"}}
-          {:type  :element,
-           :attrs nil,
-           :tag   :html,
-           :content
-           [{:type  :element,
-             :attrs nil,
-             :tag   :head,
-             :content
-             ["\n\n"
-              {:type    :element,
-               :attrs   nil,
-               :tag     :title,
-               :content ["PM SECTION - Google Groups"]}
-              "\n"
-              {:type    :element,
-               :attrs
-               {:rel "canonical",
-                :href
-                "https://groups.google.com/d/topic/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s"},
-               :tag     :link,
-               :content nil}
-              "\n"
-              {:type    :element,
-               :attrs   {:property "og:title", :content "PM SECTION"},
-               :tag     :meta,
-               :content nil}
-              "\n"
-              {:type    :element,
-               :attrs   {:property "og:type", :content "website"},
-               :tag     :meta,
-               :content nil}
-              "\n"
-              {:type    :element,
-               :attrs
-               {:property "og:url",
-                :content
-                "https://groups.google.com/forum/#!topic/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s"},
-               :tag     :meta,
-               :content nil}
-              "\n"
-              {:type    :element,
-               :attrs
-               {:property "og:image",
-                :content
-                "http://www.google.com/images/icons/product/groups-128.png"},
-               :tag     :meta,
-               :content nil}
-              "\n"
-              {:type    :element,
-               :attrs   {:property "og:site_name", :content "Google Groups"},
-               :tag     :meta,
-               :content nil}
-              "\n"
-              {:type    :element,
-               :attrs
-               {:property "og:description", :content "Posted 29/01/13 07:09"},
-               :tag     :meta,
-               :content nil}]}
-            "\n"
-            {:type  :element,
-             :attrs nil,
-             :tag   :body,
-             :content
-             ["\n\n\n"
-              {:type :element, :attrs nil, :tag :h2, :content ["PM SECTION"]}
-              "\n"
-              {:type    :element,
-               :attrs   nil,
-               :tag     :i,
-               :content ["Showing 1-1 of 1 messages"]}
-              "\n"
-              {:type  :element,
-               :attrs {:border "0", :cellspacing "0"},
-               :tag   :table,
-               :content
-               [{:type  :element,
-                 :attrs nil,
-                 :tag   :tbody,
-                 :content
-                 [{:type  :element,
+  (let [table-row {:type  :element,
                    :attrs nil,
                    :tag   :tr,
                    :content
-                   [{:type  :element,
-                     :attrs {:class "subject"},
-                     :tag   :td,
-                     :content
-                     [{:type    :element,
-                       :attrs
-                       {:href
-                        "https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J",
-                        :title "PM SECTION"},
-                       :tag     :a,
-                       :content ["PM SECTION"]}]}
-                    "\n"
-                    {:type  :element,
-                     :attrs {:class "author"},
-                     :tag   :td,
-                     :content
-                     [{:type    :element,
-                       :attrs   nil,
-                       :tag     :span,
-                       :content ["jw12203"]}]}
-                    "\n"
-                    {:type    :element,
-                     :attrs   {:class "lastPostDate"},
-                     :tag     :td,
-                     :content ["29/01/13 07:09"]}
-                    "\n"
-                    {:type  :element,
-                     :attrs {:class "snippet"},
-                     :tag   :td,
-                     :content
-                     [{:type  :element,
-                       :attrs {:style "overflow:auto"},
-                       :tag   :div,
-                       :content
-                       [{:type  :element,
-                         :attrs {:style "max-height:10000px"},
-                         :tag   :div,
-                         :content
-                         [{:type    :element,
-                           :attrs   {:dir "ltr"},
-                           :tag     :div,
-                           :content ["See PM section"]}]}
-                        {:type  :element,
-                         :attrs {:style "max-height:10000px"},
-                         :tag   :div,
-                         :content
-                         [{:type    :element,
-                           :attrs   {:dir "ltr"},
-                           :tag     :div,
-                           :content ["And then see a different thing."]}]}]}]}]}]}]}
-              "\n"]}]}]}
-        topic-posts (repeat topic-post)]
-    (testing "parsing posts"
-             (is (map? topic-post))
-             (is (= :document (:type topic-post))))
-    (testing "should transform a parsed html row list to a Topic list"
-             (let [rows (ggc/table-rows (take 2 topic-posts))]
-               (is (= 2 (count rows)))
-               (is (= :tr (-> rows first :tag)))
-               (is (vector? (-> rows first :content)))
-               (is (= :tr (-> rows second :tag)))
-               (is (vector? (-> rows second :content)))))
+                          [{:type  :element,
+                            :attrs {:class "subject"},
+                            :tag   :td,
+                            :content
+                                   [{:type    :element,
+                                     :attrs
+                                              {:href
+                                                      "https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J",
+                                               :title "PM SECTION"},
+                                     :tag     :a,
+                                     :content ["PM SECTION"]}]}
+                           {:type  :element,
+                            :attrs {:class "author"},
+                            :tag   :td,
+                            :content
+                                   [{:type    :element,
+                                     :attrs   nil,
+                                     :tag     :span,
+                                     :content ["jw12203"]}]}
+                           {:type    :element,
+                            :attrs   {:class "lastPostDate"},
+                            :tag     :td,
+                            :content ["1/29/13 7:09 AM"]}
+                           {:type  :element,
+                            :attrs {:class "snippet"},
+                            :tag   :td,
+                            :content
+                                   [{:type  :element,
+                                     :attrs {:style "overflow:auto"},
+                                     :tag   :div,
+                                     :content
+                                            [{:type  :element,
+                                              :attrs {:style "max-height:10000px"},
+                                              :tag   :div,
+                                              :content
+                                                     [{:type    :element,
+                                                       :attrs   {:dir "ltr"},
+                                                       :tag     :div,
+                                                       :content ["See PM section"]}]}
+                                             {:type  :element,
+                                              :attrs {:style "max-height:10000px"},
+                                              :tag   :div,
+                                              :content
+                                                     [{:type    :element,
+                                                       :attrs   {:dir "ltr"},
+                                                       :tag     :div,
+                                                       :content ["And then see a different thing."]}]}]}]}]}
+        topic-post {:type :document,
+                    :content
+                          [{:type :document-type,
+                            :attrs
+                                  {:name     "html",
+                                   :publicid "-//W3C//DTD HTML 4.01//EN",
+                                   :systemid "http://www.w3.org/TR/html4/strict.dtd"}}
+                           {:type  :element,
+                            :attrs nil,
+                            :tag   :html,
+                            :content
+                                   [{:type    :element,
+                                     :attrs   nil,
+                                     :tag     :head,
+                                     :content []}
+                                    {:type  :element,
+                                     :attrs nil,
+                                     :tag   :body,
+                                     :content
+                                            [{:type :element, :attrs nil, :tag :h2, :content ["PM SECTION"]}
+                                             {:type  :element,
+                                              :attrs {:border "0", :cellspacing "0"},
+                                              :tag   :table,
+                                              :content
+                                                     [{:type  :element,
+                                                       :attrs nil,
+                                                       :tag   :tbody,
+                                                       :content
+                                                              [table-row]}]}]}]}]}]
+    (testing "should transform a table row to a PostSummary"
+      (let [post-summary (gg-row->PostSummary table-row)]
+        (is (record? post-summary))
+        (is (string? (to-str post-summary)))
+        (is (= "jw12203" (:author post-summary)))
+        (is (= "6R-GZotaWk8J" (:post-id post-summary)))
+        (is (= "aLpvj-J1W2s" (:topic-id post-summary)))
+        (is (= 2013 (jt/as (:date post-summary) :year)))
+        (is
+         (= "See PM section And then see a different thing."
+            (:snippet post-summary)))
+        (is
+         (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"
+            (:email-link post-summary)))))
     (testing "should transform a parsed html doc seq to Topics"
-             (let [all-posts (posts (take 2 topic-posts))]
-               (is (record? (first all-posts)))
-               (is (string? (to-str (first all-posts))))
-               (is (= "jw12203" (:author (first all-posts))))
-               (is (= "6R-GZotaWk8J" (:post-id (first all-posts))))
-               (is (= "aLpvj-J1W2s" (:topic-id (first all-posts))))
-               (is (= 2013 (jt/as (:date (first all-posts)) :year)))
-               (is
-                (= "See PM section And then see a different thing."
-                   (:snippet (first all-posts))))
-               (is
-                (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"
-                   (:email-link (first all-posts))))
-               (is (record? (second all-posts)))
-               (is (string? (to-str (second all-posts))))
-               (is (= "jw12203" (:author (second all-posts))))
-               (is (= "6R-GZotaWk8J" (:post-id (second all-posts))))
-               (is (= "aLpvj-J1W2s" (:topic-id (second all-posts))))
-               (is (= 2013 (jt/as (:date (second all-posts)) :year)))
-               (is
-                (= "See PM section And then see a different thing."
-                   (:snippet (second all-posts))))
-               (is
-                (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"
-                   (:email-link (second all-posts))))))))
-
-;               (is (not (nil? (doseq [x all-posts] (println x)))))))))
+      (let [all-posts (posts (repeat 2 topic-post))]
+        (is (record? (second all-posts)))))))
 
 (deftest transform-message-url-to-parseable-url
-  (testing "should convert 'https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8' to 'https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J'"
-           (is
-            (=
-             (to-raw-url "https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J")
-             "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"))
-           (is
-            (=
-             (to-raw-url "https://groups.google.com/a/domain.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J")
-             "https://groups.google.com/a/domain.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"))))
+  (testing "should convert 'https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8'
+   to 'https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J'"
+    (is
+      (=
+        (to-raw-url "https://groups.google.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J")
+        "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"))
+    (is
+      (=
+        (to-raw-url "https://groups.google.com/a/domain.com/d/msg/ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J")
+        "https://groups.google.com/a/domain.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"))))
 
 (deftest all-the-strings
-  (let [snippet-td {:type  :element,
-                    :attrs {:class "snippet"},
-                    :tag   :td,
+  (let [snippet-td {:type    :element,
+                    :attrs   {:class "snippet"},
+                    :tag     :td,
                     :content [{:type  :element,
-                      :attrs {:style "overflow:auto"},
-                      :tag   :div,
-                      :content
-                      [{:type  :element,
-                        :attrs {:style "max-height:10000px"},
-                        :tag   :div,
-                        :content
-                        [{:type    :element,
-                          :attrs   {:dir "ltr"},
-                          :tag     :div,
-                          :content ["See PM section" "And QT"]}]}
-                       {:type  :element,
-                        :attrs {:style "max-height:10000px"},
-                        :tag   :div,
-                        :content
-                        [{:type    :element,
-                          :attrs   {:dir "ltr"},
-                          :tag     :div,
-                          :content ["A thing."]}]}]}]}]
+                               :attrs {:style "overflow:auto"},
+                               :tag   :div,
+                               :content
+                                      [{:type  :element,
+                                        :attrs {:style "max-height:10000px"},
+                                        :tag   :div,
+                                        :content
+                                               [{:type    :element,
+                                                 :attrs   {:dir "ltr"},
+                                                 :tag     :div,
+                                                 :content ["See PM section" "And QT"]}]}
+                                       {:type  :element,
+                                        :attrs {:style "max-height:10000px"},
+                                        :tag   :div,
+                                        :content
+                                               [{:type    :element,
+                                                 :attrs   {:dir "ltr"},
+                                                 :tag     :div,
+                                                 :content ["A thing."]}]}]}]}]
     (testing "should return strings"
-             (is (= "See PM section And QT A thing." (all-string-content snippet-td))))))
+      (is (= "See PM section And QT A thing." (all-string-content snippet-td))))))
 
 (deftest summarise-topics
   (let
@@ -326,10 +242,10 @@
       (->PostSummary "ZPVTc9e_dP0J", "07TKj7s5Eto", "Tightened Code", "Matt", "2013-01-14", "[clojure.lang.LazySeq@b76358de]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/07TKj7s5Eto/ZPVTc9e_dP0J")
       (->PostSummary "HbqA7ietFlUJ", "07TKj7s5Eto", "Re: Tightened Code", "Matt", "2013-01-14", "[clojure.lang.LazySeq@4af48185]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/07TKj7s5Eto/HbqA7ietFlUJ")]]
     (testing "should group PostSummarys by topic ID and give summary information "
-             (let [topic-summaries (summarise post-summaries)]
-               (is (map? topic-summaries))
-               (is (< (count topic-summaries) (count post-summaries)))
-               (is (= 18 (count topic-summaries)))
-               (is (= (get (first (get topic-summaries "bx12CglPiG0")) :post-id)
-                      "AEAMsIVCqbAJ"))
-               ))))
+      (let [topic-summaries (summarise post-summaries)]
+        (is (map? topic-summaries))
+        (is (< (count topic-summaries) (count post-summaries)))
+        (is (= 18 (count topic-summaries)))
+        (is (= (get (first (get topic-summaries "bx12CglPiG0")) :post-id)
+               "AEAMsIVCqbAJ"))
+        ))))

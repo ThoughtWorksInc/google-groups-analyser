@@ -15,7 +15,7 @@
     (let [page-count         (Integer. pages)
           docs               (ggc/forum-page-sequence url)
           topics             (ggc/topics (take page-count docs))
-          topic-count        (* 20 page-count)
+          topic-count        (count topics)
           topic-urls         (pst/topic-post-urls topics url)
           topic-docs         (ggc/html-hickory-pages topic-urls)
           all-posts          (pst/posts topic-docs)]

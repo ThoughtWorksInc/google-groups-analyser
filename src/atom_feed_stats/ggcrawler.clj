@@ -1,6 +1,5 @@
 (ns atom-feed-stats.ggcrawler
-  (:require [clojure.java.io :as io]
-            [clojure.string :as str]
+  (:require [clojure.string :as str]
             [clj-http.client :as client]
             [hickory.core :as hick]
             [hickory.select :as hicks])
@@ -60,10 +59,13 @@
 (defn table-rows
   "takes a sequence of hickory docs and produces a lazy seq of rows"
   [google-group-hickory-docs]
-  (when-let [s (seq google-group-hickory-docs)]
-    (lazy-seq
-      (concat (hicks/select (hicks/child (hicks/tag :body) (hicks/tag :table) (hicks/tag :tbody) (hicks/tag :tr)) (first s))
-              (table-rows (rest google-group-hickory-docs))))))
+  (flatten
+    (map
+      (fn [doc] (hicks/select (hicks/child (hicks/tag :body)
+                                           (hicks/tag :table)
+                                           (hicks/tag :tbody)
+                                           (hicks/tag :tr)) doc))
+                google-group-hickory-docs)))
 
 (defn gg-row->Topic [hickory-gg-row]
   (let [a (->> hickory-gg-row (hicks/select (hicks/tag :a)) first)
@@ -71,9 +73,14 @@
                     (hicks/select (hicks/child (hicks/class "author") (hicks/tag :span))) first)]
     (->Topic (attrs->title a) (-> author :content first) (attrs->href a))))
 
+(defn filtered-topics [topics]
+  (->> topics
+       (remove #(str/includes? (:title %) "Request for access"))
+       (remove #(str/includes? (:author %) "(via Google"))))
+
 (def topics
   "takes a sequence of 'hickory parsed google group pages' and returns a sequence of Topic records"
-  (comp #(map gg-row->Topic %) table-rows))
+  (comp filtered-topics #(map gg-row->Topic %) table-rows))
 
 (defn get-topic-id-from-url
   "Gets the end bit of the URL, useful for creating an indexed map.  Not used.  Put in Topic protocol."
