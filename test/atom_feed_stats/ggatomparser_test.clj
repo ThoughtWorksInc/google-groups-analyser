@@ -2,7 +2,8 @@
   (:require [clojure.test :refer :all]
             [java-time :as jt]
             [atom-feed-stats.ggatomparser :refer :all]
-            [atom-feed-stats.ggposts :refer (->PostSummary)]))
+            [atom-feed-stats.ggposts :refer (->PostSummary)]
+            [clojure.pprint :as pp]))
 
 (deftest post-processing
   (testing "find newest and oldest entries"
@@ -14,7 +15,33 @@
           entries (list entry1 entry2 entry3)]
       (is (= (jt/min newest oldest) oldest))
       (is (= (oldest-entry-instant entries) oldest))
-      (is (= (newest-entry-instant entries) newest)))))
+      (is (= (newest-entry-instant entries) newest))))
+  (testing "group entries by email"
+    (let [thread [{:post-id    "foo",
+                   :topic-id   "some-id2",
+                   :title      "[DEAL REVIEW] That Deal",
+                   :author     "Tara",
+                   :date       "2020-06-08",
+                   :snippet    "Hi All, Here's a project.",
+                   :email-link "link"}
+                  {:post-id    "bar",
+                   :topic-id   "some-id2",
+                   :title      "[DEAL REVIEW] That Deal",
+                   :author     "Rand",
+                   :date       "2020-06-16",
+                   :snippet    "Hi All, Here's a project.",
+                   :email-link "link"}
+                  {:post-id    "baz",
+                   :topic-id   "some-id2",
+                   :title      "[DEAL REVIEW] That Deal",
+                   :author     "Rand",
+                   :date       "2020-06-16",
+                   :snippet    "Hi All, Here's a project.",
+                   :email-link "link"}]]
+      (is (= (thread-emails-with-counts thread)
+             ["Tara 1" "Rand 2"])))))
+
+
 
 (deftest thread-stat-processing
   (testing "transform grouped PostSummary records into ThreadStat records"
@@ -32,7 +59,7 @@
       (is (= 2 (-> threadstats last :email-count)))
       (is (= 8 (-> threadstats last :days-span)))
       (is (= 2 (-> threadstats last :unique-contributor-count)))
-      (is (= ["Tara" "Rand"] (-> threadstats last :unique-contributors)))
+      (is (= ["Tara 1" "Rand 1"] (-> threadstats last :unique-contributors)))
       ))
 
   (testing "protocols on records"

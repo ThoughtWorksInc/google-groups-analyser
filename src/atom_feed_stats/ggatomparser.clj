@@ -15,8 +15,8 @@
 (defn newest-entry-instant [entry-seq]
   (entry-reducer entry-seq :date jt/max))
 
-(defn group-entries-by-email [entries]
-  (group-by :author entries))
+(defn thread-emails-with-counts [entries]
+  (map #(str (key %) " " (count (val %))) (group-by :author entries)))
 
 (defprotocol Values (get-values [_]))
 
@@ -42,12 +42,12 @@
     #(let [topic-id (key %)
            thread (val %)
            first-thread (first thread)
-           unique-emails (group-entries-by-email thread)]
+           thread-emails-by-author (thread-emails-with-counts thread)]
        (->ThreadStat topic-id
                      (:title first-thread)
                      (:author first-thread)
                      (count thread)
                      (jt/time-between (oldest-entry-instant thread) (newest-entry-instant thread) :days)
-                     (count unique-emails)
-                     (keys unique-emails)))
+                     (count thread-emails-by-author)
+                     thread-emails-by-author))
     threads))
