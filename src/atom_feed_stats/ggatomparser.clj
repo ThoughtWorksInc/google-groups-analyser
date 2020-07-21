@@ -16,7 +16,10 @@
   (entry-reducer entry-seq :date jt/max))
 
 (defn thread-emails-with-counts [entries]
-  (map #(str (key %) " " (count (val %))) (group-by :author entries)))
+  (->> entries
+       (group-by :author)
+       (map #(str (key %) " " (count (val %))))
+       sort))
 
 (defprotocol Values (get-values [_]))
 
@@ -49,5 +52,5 @@
                      (count thread)
                      (jt/time-between (oldest-entry-instant thread) (newest-entry-instant thread) :days)
                      (count thread-emails-by-author)
-                     thread-emails-by-author))
+                     (seq thread-emails-by-author)))
     threads))

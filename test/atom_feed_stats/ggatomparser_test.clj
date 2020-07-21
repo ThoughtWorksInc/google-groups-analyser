@@ -39,7 +39,7 @@
                    :snippet    "Hi All, Here's a project.",
                    :email-link "link"}]]
       (is (= (thread-emails-with-counts thread)
-             ["Tara 1" "Rand 2"])))))
+             ["Rand 2" "Tara 1"])))))
 
 
 
@@ -59,7 +59,7 @@
       (is (= 2 (-> threadstats last :email-count)))
       (is (= 8 (-> threadstats last :days-span)))
       (is (= 2 (-> threadstats last :unique-contributor-count)))
-      (is (= ["Tara 1" "Rand 1"] (-> threadstats last :unique-contributors)))
+      (is (= ["Rand 1" "Tara 1"] (-> threadstats last :unique-contributors)))
       ))
 
   (testing "protocols on records"
