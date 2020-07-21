@@ -1,10 +1,8 @@
 (ns atom-feed-stats.ggposts
   (:require [atom-feed-stats.ggcrawler :as ggc]
-            [clojure.java.io :as io]
+            [atom-feed-stats.ggatomparser :as gga]
             [clojure.string :as str]
-            [clj-http.client :as client]
             [java-time :as jt]
-            [hickory.core :as hick]
             [hickory.select :as hicks])
   (:gen-class))
 
@@ -32,13 +30,7 @@
        (interpose " ")
        (apply str)))
 
-(defprotocol PostSummaryFn
-  (to-str [_]))
-
-(defrecord PostSummary [post-id topic-id title author date snippet email-link]
-  PostSummaryFn
-  (to-str [_]
-    (str post-id "/" topic-id ", " title ", " author ", " date ", [" "], " email-link)))
+(defrecord PostSummary [post-id topic-id title author date snippet email-link])
 
 (defn to-local-date [date-str]
   (jt/local-date "M/d/yy H:ss a" date-str))
@@ -56,7 +48,7 @@
                                                         (hicks/select (hicks/and (hicks/class "snippet") (hicks/tag :td))) first)]
       (->PostSummary post-id
                      topic-id
-                     (ggc/attrs->title a)
+                     (-> a ggc/attrs->title (str/replace "," ""))
                      (-> author :content first)
                      jt-date
                      (-> snippet all-string-content (str/replace "," "") (str/replace "/n" ""))
@@ -71,7 +63,10 @@
 
 (defn summarise [posts]
   "groups PostSummary records by their topic-id"
-  (group-by :topic-id posts))
+  (->> posts
+       (group-by :topic-id)
+       gga/map-to-ThreadStat))
+
 
 
 

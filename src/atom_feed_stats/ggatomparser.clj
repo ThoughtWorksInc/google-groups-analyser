@@ -1,54 +1,22 @@
 (ns atom-feed-stats.ggatomparser
-  (:require [java-time :as jt]
-            [clojure.java.io :as io]
-            [clojure.xml :as xml])
+  (:require [java-time :as jt])
   (:gen-class))
 
-(defrecord Entry [thread-id name email updated title summary])
-
-(defn parse-atom [resource]
-  (-> resource io/resource io/file xml/parse))
-
-(defn get-element [entry tag-name]
-  (->> entry
-       :content
-       (filter #(-> % :tag (= tag-name)))
-       first))
-
-(defn get-element-content [entry tag-name]
-  (-> (get-element entry tag-name)
-      :content
-      first))
-
-(defn feed-to-entry-seq [feed]
-  (->> feed
-       :content
-       (filter #(= (:tag %) :entry))
-       (map
-        #(->Entry
-          (get-element-content % :id)
-          (get-element-content (get-element % :author) :name)
-          (get-element-content (get-element % :author) :email)
-          (jt/instant (get-element-content % :updated))
-          (get-element-content % :title)
-          (get-element-content % :summary)))))
 
 (defn entry-reducer [entry-seq entry-field func]
   (->> entry-seq
        (map #(-> % entry-field))
-       (apply func)))
+       (apply func)
+       (jt/local-date)))
 
 (defn oldest-entry-instant [entry-seq]
-  (entry-reducer entry-seq :updated jt/min))
+  (entry-reducer entry-seq :date jt/min))
 
 (defn newest-entry-instant [entry-seq]
-  (entry-reducer entry-seq :updated jt/max))
-
-(defn group-entries-by-thread-id [entries]
-  (group-by :thread-id entries))
+  (entry-reducer entry-seq :date jt/max))
 
 (defn group-entries-by-email [entries]
-  (group-by :email entries))
+  (group-by :author entries))
 
 (defprotocol Values (get-values [_]))
 
@@ -71,15 +39,15 @@
 
 (defn map-to-ThreadStat [threads]
   (map
-   #(let [k             (key %)
-          v             (val %)
-          f             (first v)
-          unique-emails (group-entries-by-email v)]
-     (->ThreadStat k
-                   (:title f)
-                   (:name f)
-                   (count v)
-                   (jt/time-between (oldest-entry-instant v) (newest-entry-instant v) :days)
-                   (count unique-emails)
-                   (keys unique-emails)))
-   threads))
+    #(let [topic-id (key %)
+           thread (val %)
+           first-thread (first thread)
+           unique-emails (group-entries-by-email thread)]
+       (->ThreadStat topic-id
+                     (:title first-thread)
+                     (:author first-thread)
+                     (count thread)
+                     (jt/time-between (oldest-entry-instant thread) (newest-entry-instant thread) :days)
+                     (count unique-emails)
+                     (keys unique-emails)))
+    threads))

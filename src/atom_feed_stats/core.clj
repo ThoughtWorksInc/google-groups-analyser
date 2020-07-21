@@ -1,11 +1,10 @@
 (ns atom-feed-stats.core
   (:require [atom-feed-stats.ggcrawler :as ggc]
             [atom-feed-stats.ggposts :as pst]
-            [java-time :as jt]
-            [clojure.data.csv :as csv]
-            [clojure.java.io :as io]
-            [clojure.xml :as xml])
+            [atom-feed-stats.ggatomparser :as gga])
   (:gen-class))
+
+(defn to-str [row] (apply str (interpose ", " (vals row))))
 
 (defn crawl [[url pages cookie-file]]
   "The parental figure"
@@ -15,19 +14,15 @@
     (let [page-count         (Integer. pages)
           docs               (ggc/forum-page-sequence url)
           topics             (ggc/topics (take page-count docs))
-          topic-count        (count topics)
           topic-urls         (pst/topic-post-urls topics url)
           topic-docs         (ggc/html-hickory-pages topic-urls)
-          all-posts          (pst/posts topic-docs)]
+          all-posts          (pst/posts topic-docs)
+          posts-summary      (pst/summarise all-posts)]
       (println "-----------------------")
-      (doseq [x (take topic-count topics)] (println (ggc/to-str x)))
+      (println "thread-id, title, initiator, email-count, days-span, unique-contributor-count, unique-contributors")
+      (doseq [y posts-summary] (println (to-str y)))
       (println "-----------------------")
-      (println "End of" topic-count "topics.")
-      (println " ")
-      (println "-----------------------")
-      (doseq [y all-posts] (println (pst/to-str y)))
-      (println "-----------------------")
-      (println "End of" topic-count "posts."))))
+      (println "End of" (count posts-summary) "threadstats."))))
 
 (defn -main [& args]
   (if (< (count args) 2)

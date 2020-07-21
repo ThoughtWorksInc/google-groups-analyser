@@ -142,17 +142,16 @@
     (testing "should transform a table row to a PostSummary"
       (let [post-summary (gg-row->PostSummary table-row)]
         (is (record? post-summary))
-        (is (string? (to-str post-summary)))
         (is (= "jw12203" (:author post-summary)))
         (is (= "6R-GZotaWk8J" (:post-id post-summary)))
         (is (= "aLpvj-J1W2s" (:topic-id post-summary)))
         (is (= 2013 (jt/as (:date post-summary) :year)))
         (is
-         (= "See PM section And then see a different thing."
-            (:snippet post-summary)))
+          (= "See PM section And then see a different thing."
+             (:snippet post-summary)))
         (is
-         (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"
-            (:email-link post-summary)))))
+          (= "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/aLpvj-J1W2s/6R-GZotaWk8J"
+             (:email-link post-summary)))))
     (testing "should transform a parsed html doc seq to Topics"
       (let [all-posts (posts (repeat 2 topic-post))]
         (is (record? (second all-posts)))))))
@@ -242,10 +241,11 @@
       (->PostSummary "ZPVTc9e_dP0J", "07TKj7s5Eto", "Tightened Code", "Matt", "2013-01-14", "[clojure.lang.LazySeq@b76358de]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/07TKj7s5Eto/ZPVTc9e_dP0J")
       (->PostSummary "HbqA7ietFlUJ", "07TKj7s5Eto", "Re: Tightened Code", "Matt", "2013-01-14", "[clojure.lang.LazySeq@4af48185]", "https://groups.google.com/forum/message/raw?msg=ubu-comp-sci-masters-project-group-4/07TKj7s5Eto/HbqA7ietFlUJ")]]
     (testing "should group PostSummarys by topic ID and give summary information "
-      (let [topic-summaries (summarise post-summaries)]
-        (is (map? topic-summaries))
-        (is (< (count topic-summaries) (count post-summaries)))
-        (is (= 18 (count topic-summaries)))
-        (is (= (get (first (get topic-summaries "bx12CglPiG0")) :post-id)
-               "AEAMsIVCqbAJ"))
-        ))))
+             (let [topic-summaries (summarise post-summaries)]
+               (is (coll? topic-summaries))
+               (is (< (count topic-summaries) (count post-summaries)))
+               (is (= 18 (count topic-summaries)))
+               (is (record? (first topic-summaries)))
+               (is (= (:thread-id (first topic-summaries))
+                      "4RpCgJDx7uA"))
+               ))))
